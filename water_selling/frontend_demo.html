@@ -1,297 +1,637 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Water Selling & Refilling Demo</title>
-<style>
-  body {
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background: #f0f8ff;
-    margin: 0;
-    padding: 0 1rem;
-  }
-  header {
-    background: #0077b6;
-    color: white;
-    padding: 1rem;
-    text-align: center;
-  }
-  h1 {
-    margin: 0;
-  }
-  #auth-section, #product-section, #order-section {
-    margin: 1rem auto;
-    max-width: 600px;
-    background: white;
-    border-radius: 8px;
-    padding: 1rem;
-    box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
-  }
-  input, select, button {
-    font-size: 1rem;
-    margin: 0.5rem 0;
-    padding: 0.4rem;
-    width: 100%;
-    box-sizing: border-box;
-    border: 1px solid #0077b6;
-    border-radius: 4px;
-  }
-  button {
-    background: #0077b6;
-    color: white;
-    border: none;
-    cursor: pointer;
-  }
-  button:hover {
-    background: #005f86;
-  }
-  ul {
-    list-style: none;
-    padding-left: 0;
-  }
-  li {
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #ddd;
-  }
-  label {
-    display: block;
-  }
-  .hidden {
-    display: none;
-  }
-  #message {
-    margin: 1rem 0;
-    color: red;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Water Selling & Refilling</title>
+  <style>
+    :root {
+      --primary-color: #0496FF;
+      --secondary-color: #00F5D4;
+      --background-color: #E0F7FA;
+      --text-color: #023E8A;
+      --button-hover: #0077CC;
+      --error-color: #D90429;
+      --success-color: #2BB673;
+      --warning-color: #FF9E00;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 2rem;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    main {
+      background: white;
+      border-radius: 1rem;
+      padding: 2rem 3rem;
+      max-width: 700px;
+      width: 100%;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+      font-weight: 700;
+      font-size: 2.5rem;
+      color: var(--primary-color);
+    }
+
+    section {
+      margin-bottom: 2rem;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      background: #f0f9ff;
+      border: 1px solid var(--primary-color);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    section.hidden {
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      display: block !important;
+      height: 0;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      border: none;
+    }
+
+    section h2 {
+      margin-top: 0;
+      font-size: 1.5rem;
+      border-bottom: 2px solid var(--secondary-color);
+      padding-bottom: 0.3rem;
+      color: var(--primary-color);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.3rem;
+      font-weight: 600;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      margin-bottom: 1rem;
+      border: 2px solid var(--primary-color);
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      background-color: #e6f4ff;
+      color: var(--text-color);
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--secondary-color);
+      background-color: white;
+      box-shadow: 0 0 8px var(--secondary-color);
+    }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      font-size: 1.1rem;
+      border-radius: 0.6rem;
+      cursor: pointer;
+      font-weight: 700;
+      width: 100%;
+      max-width: 300px;
+      display: block;
+      margin: 1rem auto;
+      transition: all 0.2s ease;
+    }
+
+    button:hover:not(:disabled) {
+      background-color: var(--button-hover);
+      box-shadow: 0 6px 12px rgba(0, 119, 204, 0.6);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    #message {
+      text-align: center;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      min-height: 1.5rem;
+    }
+
+    #message.error {
+      color: var(--error-color);
+    }
+
+    #message.success {
+      color: var(--success-color);
+    }
+
+    #message.warning {
+      color: var(--warning-color);
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    ul li {
+      padding: 0.5rem;
+      border-bottom: 1px solid var(--secondary-color);
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .stock-info {
+      font-size: 0.9rem;
+      color: var(--text-color);
+      opacity: 0.8;
+    }
+
+    .out-of-stock {
+      color: var(--error-color);
+      font-weight: bold;
+    }
+
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .order-price {
+      color: var(--success-color);
+    }
+
+    .loading {
+      position: relative;
+      pointer-events: none;
+    }
+
+    .loading::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 1rem;
+      }
+      main {
+        padding: 1.5rem;
+      }
+      h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
 </head>
 <body>
-<header>
-  <h1>Water Selling & Refilling Demo</h1>
-</header>
+  <main>
+    <h1>Water Selling & Refilling</h1>
+    <div id="message" aria-live="polite"></div>
 
-<section id="auth-section">
-  <h2>User Registration</h2>
-  <input type="text" id="reg-username" placeholder="Username" />
-  <input type="email" id="reg-email" placeholder="Email" />
-  <input type="password" id="reg-password" placeholder="Password" />
-  <button id="register-btn">Register</button>
+    <section id="auth-section">
+      <h2>Register</h2>
+      <input type="text" id="reg-username" placeholder="Username" autocomplete="username" />
+      <input type="password" id="reg-password" placeholder="Password" autocomplete="new-password" />
+      <button id="register-btn">Register</button>
 
-  <h2>User Login</h2>
-  <input type="text" id="login-username" placeholder="Username" />
-  <input type="password" id="login-password" placeholder="Password" />
-  <button id="login-btn">Login</button>
+      <h2>Login</h2>
+      <input type="text" id="login-username" placeholder="Username" autocomplete="username" />
+      <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" />
+      <button id="login-btn">Login</button>
+    </section>
 
-  <div id="message"></div>
-</section>
+    <section id="product-section" class="hidden">
+      <h2>Available Water Products</h2>
+      <ul id="product-list"></ul>
+    </section>
 
-<section id="product-section" class="hidden">
-  <h2>Product Catalog</h2>
-  <ul id="product-list"></ul>
-</section>
+    <section id="order-section" class="hidden">
+      <h2>Place Order</h2>
+      <label for="product-select">Select Product</label>
+      <select id="product-select"></select>
+      <div id="product-stock-info" class="stock-info"></div>
+      <label for="order-quantity">Quantity</label>
+      <input type="number" id="order-quantity" min="1" value="1" />
+      <button id="order-btn">Order</button>
 
-<section id="order-section" class="hidden">
-  <h2>Create Order</h2>
-  <label for="product-select">Select Product</label>
-  <select id="product-select"></select>
-  <label for="order-quantity">Quantity</label>
-  <input type="number" id="order-quantity" min="1" value="1" />
-  <button id="order-btn">Place Order</button>
+      <h3>Your Orders</h3>
+      <ul id="order-list"></ul>
+      <p><strong>Total: KES <span id="grand-total">0</span></strong></p>
+      <button id="clear-orders-btn">Clear All Orders</button>
+      <button id="logout-btn" class="logout-btn">Logout</button>
+    </section>
+  </main>
 
-  <h2>Your Orders</h2>
-  <ul id="order-list"></ul>
-</section>
+  <script>
+    const API_BASE = "http://localhost:8000/api";
+    let token = localStorage.getItem("token");
+    let productsData = []; // Store products data for stock management
 
-<script>
-const API_BASE = 'http://127.0.0.1:8000/api';
-let token = localStorage.getItem('authToken') || '';
+    // DOM Elements
+    const authSection = document.getElementById("auth-section");
+    const productSection = document.getElementById("product-section");
+    const orderSection = document.getElementById("order-section");
+    const messageDiv = document.getElementById("message");
 
-const messageEl = document.getElementById('message');
-const authSection = document.getElementById('auth-section');
-const productSection = document.getElementById('product-section');
-const orderSection = document.getElementById('order-section');
-const productListEl = document.getElementById('product-list');
-const productSelect = document.getElementById('product-select');
-const orderListEl = document.getElementById('order-list');
+    const productList = document.getElementById("product-list");
+    const productSelect = document.getElementById("product-select");
+    const orderList = document.getElementById("order-list");
+    const grandTotal = document.getElementById("grand-total");
+    const productStockInfo = document.getElementById("product-stock-info");
+    const orderQuantity = document.getElementById("order-quantity");
 
-function showMessage(msg, isError=true) {
-  messageEl.textContent = msg;
-  messageEl.style.color = isError ? 'red' : 'green';
-  setTimeout(() => { messageEl.textContent = ''; }, 4000);
-}
+    // Buttons
+    const registerBtn = document.getElementById("register-btn");
+    const loginBtn = document.getElementById("login-btn");
+    const orderBtn = document.getElementById("order-btn");
+    const clearOrdersBtn = document.getElementById("clear-orders-btn");
+    const logoutBtn = document.getElementById("logout-btn");
 
-async function register() {
-  const username = document.getElementById('reg-username').value.trim();
-  const email = document.getElementById('reg-email').value.trim();
-  const password = document.getElementById('reg-password').value;
-  if (!username || !email || !password) {
-    showMessage('Fill all registration fields.');
-    return;
-  }
-  try {
-    const res = await fetch(`${API_BASE}/register/`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({username, email, password})
-    });
-    if (res.ok) {
-      showMessage('Registration successful! You can now login.', false);
-      document.getElementById('reg-username').value = '';
-      document.getElementById('reg-email').value = '';
-      document.getElementById('reg-password').value = '';
-    } else {
-      const data = await res.json();
-      let err = JSON.stringify(data);
-      if(data.password) err = data.password.join(' ');
-      else if(data.username) err = data.username.join(' ');
-      showMessage(err);
+    // Utility Functions
+    function showMessage(msg, type = "error") {
+      messageDiv.textContent = msg;
+      messageDiv.className = type;
+      setTimeout(() => {
+        messageDiv.textContent = "";
+        messageDiv.className = "";
+      }, 4000);
     }
-  } catch(e) {
-    showMessage('Error during registration. ' + e.message);
-  }
-}
 
-async function login() {
-  const username = document.getElementById('login-username').value.trim();
-  const password = document.getElementById('login-password').value;
-  if (!username || !password) {
-    showMessage('Fill both login fields.');
-    return;
-  }
-  try {
-    const res = await fetch(`${API_BASE}/login/`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({username, password})
-    });
-    if (res.ok) {
-      const data = await res.json();
-      token = data.token;
-      localStorage.setItem('authToken', token);
-      showMessage('Login successful!', false);
-      document.getElementById('login-username').value = '';
-      document.getElementById('login-password').value = '';
-      afterLogin();
-    } else {
-      showMessage('Invalid username or password.');
+    function setLoading(button, isLoading) {
+      if (isLoading) {
+        button.dataset.originalText = button.textContent;
+        button.innerHTML = '<span class="loading-text">Processing...</span>';
+        button.classList.add("loading");
+        button.disabled = true;
+      } else {
+        button.textContent = button.dataset.originalText;
+        button.classList.remove("loading");
+        button.disabled = false;
+      }
     }
-  } catch(e) {
-    showMessage('Error during login. ' + e.message);
-  }
-}
 
-async function fetchProducts() {
-  try {
-    const res = await fetch(`${API_BASE}/products/`);
-    if (res.ok) {
-      const products = await res.json();
-      productListEl.innerHTML = '';
-      productSelect.innerHTML = '<option value="">Select a product</option>';
-      products.forEach(prod => {
-        const li = document.createElement('li');
-        li.textContent = `${prod.name} - $${prod.price.toFixed(2)} [Stock: ${prod.stock}]`;
-        productListEl.appendChild(li);
-        if (prod.stock > 0) {
-          const option = document.createElement('option');
-          option.value = prod.id;
-          option.textContent = prod.name;
-          productSelect.appendChild(option);
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('en-KE', {
+        style: 'decimal',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(amount);
+    }
+
+    // Product Functions
+    async function fetchProducts() {
+      try {
+        const res = await fetch(`${API_BASE}/products/`, {
+          headers: { Authorization: `Token ${token}` },
+        });
+
+        if (!res.ok) {
+          throw await res.json();
+        }
+
+        productsData = await res.json();
+        renderProducts();
+        updateStockInfo();
+      } catch (error) {
+        handleApiError(error, "Failed to fetch products.");
+      }
+    }
+
+    function renderProducts() {
+      productList.innerHTML = "";
+      productSelect.innerHTML = "<option value=''>Select a product</option>";
+
+      productsData.forEach(product => {
+        // Add to product list
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <div>
+            <strong>${product.name}</strong> - KES ${formatCurrency(product.price)}
+            <div class="stock-info ${product.stock <= 0 ? 'out-of-stock' : ''}">
+              ${product.stock <= 0 ? 'Out of stock' : `${product.stock} available`}
+            </div>
+          </div>
+        `;
+        productList.appendChild(li);
+
+        // Add to product select dropdown
+        const option = document.createElement("option");
+        option.value = product.id;
+        option.textContent = `${product.name} - KES ${formatCurrency(product.price)}`;
+        option.disabled = product.stock <= 0;
+        productSelect.appendChild(option);
+      });
+    }
+
+    function updateStockInfo() {
+      const selectedProductId = productSelect.value;
+      const product = productsData.find(p => p.id == selectedProductId);
+      
+      if (!product) {
+        productStockInfo.textContent = "";
+        return;
+      }
+
+      productStockInfo.textContent = product.stock <= 0 ? 
+        "Out of stock" : 
+        `${product.stock} units available`;
+      productStockInfo.className = `stock-info ${product.stock <= 0 ? 'out-of-stock' : ''}`;
+      
+      // Update max quantity
+      orderQuantity.max = product.stock;
+      if (product.stock <= 0) {
+        orderQuantity.value = 0;
+        orderQuantity.disabled = true;
+      } else {
+        orderQuantity.disabled = false;
+        if (orderQuantity.value > product.stock) {
+          orderQuantity.value = product.stock;
+        }
+      }
+    }
+
+    // Order Functions
+    async function fetchOrders() {
+      try {
+        const res = await fetch(`${API_BASE}/orders/`, {
+          headers: { Authorization: `Token ${token}` },
+        });
+
+        if (!res.ok) {
+          throw await res.json();
+        }
+
+        const orders = await res.json();
+        renderOrders(orders);
+        calculateGrandTotal(orders);
+      } catch (error) {
+        handleApiError(error, "Failed to fetch orders.");
+      }
+    }
+
+    function renderOrders(orders) {
+      orderList.innerHTML = "";
+
+      if (orders.length === 0) {
+        const li = document.createElement("li");
+        li.textContent = "No orders yet";
+        orderList.appendChild(li);
+        return;
+      }
+
+      orders.forEach(order => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <div class="order-item">
+            <span>${order.product_name} x${order.quantity}</span>
+            <span class="order-price">KES ${formatCurrency(order.total_price)}</span>
+          </div>
+        `;
+        orderList.appendChild(li);
+      });
+    }
+
+    function calculateGrandTotal(orders) {
+      const total = orders.reduce((sum, order) => sum + order.total_price, 0);
+      grandTotal.textContent = formatCurrency(total);
+    }
+
+    async function placeOrder() {
+      const productId = productSelect.value;
+      const quantity = parseInt(orderQuantity.value);
+
+      if (!productId || quantity <= 0) {
+        showMessage("Please select a product and valid quantity", "warning");
+        return;
+      }
+
+      setLoading(orderBtn, true);
+
+      try {
+        const res = await fetch(`${API_BASE}/orders/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${token}`,
+          },
+          body: JSON.stringify({ 
+            product: productId, 
+            quantity: quantity 
+          }),
+        });
+
+        if (!res.ok) {
+          throw await res.json();
+        }
+
+        const newOrder = await res.json();
+        showMessage(`Order placed successfully for ${newOrder.product_name} x${newOrder.quantity}!`, "success");
+        fetchOrders();
+        fetchProducts(); // Refresh product stock
+      } catch (error) {
+        handleApiError(error, "Failed to place order.");
+      } finally {
+        setLoading(orderBtn, false);
+      }
+    }
+
+    async function clearAllOrders() {
+      if (!confirm("Are you sure you want to clear all orders?")) return;
+
+      setLoading(clearOrdersBtn, true);
+
+      try {
+        const res = await fetch(`${API_BASE}/orders/clear/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          throw await res.json();
+        }
+
+        showMessage("All orders cleared successfully!", "success");
+        fetchOrders();
+        fetchProducts(); // Refresh product stock
+      } catch (error) {
+        handleApiError(error, "Failed to clear orders.");
+      } finally {
+        setLoading(clearOrdersBtn, false);
+      }
+    }
+
+    // Auth Functions
+    async function register() {
+      const username = document.getElementById("reg-username").value.trim();
+      const password = document.getElementById("reg-password").value;
+
+      if (!username || !password) {
+        showMessage("Username and password are required", "warning");
+        return;
+      }
+
+      setLoading(registerBtn, true);
+
+      try {
+        const res = await fetch(`${API_BASE}/register/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        });
+
+        if (!res.ok) {
+          throw await res.json();
+        }
+
+        showMessage("Registration successful. Please login.", "success");
+        document.getElementById("reg-username").value = "";
+        document.getElementById("reg-password").value = "";
+      } catch (error) {
+        handleApiError(error, "Registration failed.");
+      } finally {
+        setLoading(registerBtn, false);
+      }
+    }
+
+    async function login() {
+      const username = document.getElementById("login-username").value.trim();
+      const password = document.getElementById("login-password").value;
+
+      if (!username || !password) {
+        showMessage("Username and password are required", "warning");
+        return;
+      }
+
+      setLoading(loginBtn, true);
+
+      try {
+        const res = await fetch(`${API_BASE}/login/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        });
+
+        if (!res.ok) {
+          throw await res.json();
+        }
+
+        const data = await res.json();
+        token = data.token;
+        localStorage.setItem("token", token);
+
+        showMessage("Logged in successfully!", "success");
+        authSection.classList.add("hidden");
+        productSection.classList.remove("hidden");
+        orderSection.classList.remove("hidden");
+
+        // Focus on product select after login
+        setTimeout(() => productSelect.focus(), 100);
+
+        fetchProducts();
+        fetchOrders();
+      } catch (error) {
+        handleApiError(error, "Login failed.");
+      } finally {
+        setLoading(loginBtn, false);
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem("token");
+      token = null;
+      authSection.classList.remove("hidden");
+      productSection.classList.add("hidden");
+      orderSection.classList.add("hidden");
+      showMessage("Logged out successfully!", "success");
+      document.getElementById("login-username").focus();
+    }
+
+    // Error Handling
+    function handleApiError(error, defaultMessage) {
+      console.error("API Error:", error);
+      const message = error.detail || error.message || defaultMessage;
+      showMessage(message, "error");
+
+      // If unauthorized, force logout
+      if (error.status === 401) {
+        logout();
+      }
+    }
+
+    // Event Listeners
+    registerBtn.addEventListener("click", register);
+    loginBtn.addEventListener("click", login);
+    orderBtn.addEventListener("click", placeOrder);
+    clearOrdersBtn.addEventListener("click", clearAllOrders);
+    logoutBtn.addEventListener("click", logout);
+
+    // Product selection change
+    productSelect.addEventListener("change", updateStockInfo);
+
+    // Form submission with Enter key
+    document.querySelectorAll("input").forEach(input => {
+      input.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          if (authSection.classList.contains("hidden")) {
+            placeOrder();
+          } else {
+            if (input.id === "login-username" || input.id === "login-password") {
+              login();
+            } else {
+              register();
+            }
+          }
         }
       });
-    } else {
-      productListEl.textContent = 'Failed to load products.';
-    }
-  } catch(e) {
-    productListEl.textContent = 'Error loading products: ' + e.message;
-  }
-}
-
-async function fetchOrders() {
-  if (!token) return;
-  try {
-    const res = await fetch(`${API_BASE}/orders/`, {
-      headers: {'Authorization': 'Token ' + token}
     });
-    if (res.ok) {
-      const orders = await res.json();
-      orderListEl.innerHTML = '';
-      if (orders.length === 0) {
-        orderListEl.textContent = 'No orders yet.';
-      } else {
-        orders.forEach(order => {
-          const li = document.createElement('li');
-          li.textContent = `Order #${order.id}: ${order.product} x ${order.quantity} = $${order.total_price} (Status: ${order.status})`;
-          orderListEl.appendChild(li);
-        });
-      }
-    } else {
-      orderListEl.textContent = 'Failed to load orders.';
-    }
-  } catch(e) {
-    orderListEl.textContent = 'Error loading orders: ' + e.message;
-  }
-}
 
-async function placeOrder() {
-  const productId = productSelect.value;
-  const quantity = parseInt(document.getElementById('order-quantity').value, 10);
-  if (!productId) {
-    showMessage('Select a product.');
-    return;
-  }
-  if (!quantity || quantity < 1) {
-    showMessage('Enter a valid quantity.');
-    return;
-  }
-  try {
-    const res = await fetch(`${API_BASE}/orders/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Token ' + token
-      },
-      body: JSON.stringify({product: productId, quantity: quantity})
-    });
-    if (res.ok) {
-      showMessage('Order placed successfully.', false);
-      fetchOrders();
+    // Initialize
+    if (token) {
+      authSection.classList.add("hidden");
+      productSection.classList.remove("hidden");
+      orderSection.classList.remove("hidden");
       fetchProducts();
-      document.getElementById('order-quantity').value = '1';
+      fetchOrders();
     } else {
-      const errorData = await res.json();
-      let errMsg = 'Error placing order.';
-      if (typeof errorData === 'object') {
-        if (errorData.non_field_errors) errMsg = errorData.non_field_errors.join(' ');
-        else errMsg = JSON.stringify(errorData);
-      }
-      showMessage(errMsg);
+      document.getElementById("login-username").focus();
     }
-  } catch(e) {
-    showMessage('Error placing order: ' + e.message);
-  }
-}
-
-function afterLogin() {
-  authSection.classList.add('hidden');
-  productSection.classList.remove('hidden');
-  orderSection.classList.remove('hidden');
-  fetchProducts();
-  fetchOrders();
-}
-
-function checkLoggedIn() {
-  if (token) {
-    afterLogin();
-  }
-}
-
-document.getElementById('register-btn').addEventListener('click', register);
-document.getElementById('login-btn').addEventListener('click', login);
-document.getElementById('order-btn').addEventListener('click', placeOrder);
-
-checkLoggedIn();
-</script>
-
+  </script>
 </body>
 </html>

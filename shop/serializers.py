@@ -1,31 +1,30 @@
-from rest_framework import serializers
 from django.contrib.auth.models import User
+from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from django.db import transaction
 from .models import WaterProduct, Order
 
 
+# --- User Serializer ---
 class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=8)
-
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'password']
+        extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data.get('email'),
-            password=validated_data['password']
-        )
+        user = User.objects.create_user(**validated_data)
         return user
 
 
+# --- Water Product Serializer ---
 class WaterProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = WaterProduct
         fields = ['id', 'name', 'description', 'price', 'stock']
 
 
+# --- Order Serializer ---
 class OrderSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField(source='user.username')
     product = serializers.PrimaryKeyRelatedField(queryset=WaterProduct.objects.all())
@@ -54,22 +53,23 @@ class OrderSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         product = validated_data['product']
         quantity = validated_data['quantity']
-        total_price = product.price * quantity
+        user = self.context['request'].user
 
         with transaction.atomic():
             product.refresh_from_db()
-            if product.stock < quantity:
-                raise serializers.ValidationError("Not enough stock available.")
 
+            if product.stock < quantity:
+                raise ValidationError("Not enough stock available.")
+
+            # Update stock
             product.stock -= quantity
             product.save()
 
+            # total_price is auto-calculated in model
             order = Order.objects.create(
-                user=self.context['request'].user,
+                user=user,
                 product=product,
                 quantity=quantity,
-                total_price=total_price,
-                status='PENDING',
             )
 
         return order
